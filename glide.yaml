@@ -1,0 +1,5 @@
+package: github.com/kunalpareek/golang-rest-api
+import:
+- package: github.com/gorilla/mux
+  version: v1.7.0
+- package: gopkg.in/mgo.v2
