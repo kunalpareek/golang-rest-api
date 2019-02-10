@@ -20,9 +20,7 @@ func main() {
 
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
-	// r := mux.NewRouter()
-	// r.Use(middleware.Auth)
-	// r = ip.Routes(r)
+
 	if err := http.ListenAndServe(":3000", buildRouter(session)); err != nil {
 		log.Fatal(err)
 	}

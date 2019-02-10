@@ -71,8 +71,8 @@ func (dao *BookDAO) Count() (int, error) {
 }
 
 // Query retrieves the Book records with the specified offset and limit from the database.
-func (dao *BookDAO) Query(offset, limit int) ([]models.Book, error) {
+func (dao *BookDAO) Query(queryParam interface{}, offset, limit int) ([]models.Book, error) {
 	Books := []models.Book{}
-	err := dao.dbConnection.DB(dao.dbName).C(dao.collectionName).Find(nil).All(&Books)
+	err := dao.dbConnection.DB(dao.dbName).C(dao.collectionName).Find(queryParam).All(&Books)
 	return Books, err
 }

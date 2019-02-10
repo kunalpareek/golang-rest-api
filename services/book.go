@@ -12,7 +12,7 @@ type bookDAO interface {
 	// Count returns the number of books.
 	Count() (int, error)
 	// Query returns the list of books with the given offset and limit.
-	Query(offset, limit int) ([]models.Book, error)
+	Query(queryParam interface{}, offset, limit int) ([]models.Book, error)
 	// Create saves a new book in the storage.
 	Create(book *models.Book) error
 	// Update updates the book with given ID in the storage.
@@ -74,6 +74,6 @@ func (s *BookService) Count() (int, error) {
 }
 
 // Query returns the books with the specified offset and limit.
-func (s *BookService) Query(offset, limit int) ([]models.Book, error) {
-	return s.dao.Query(offset, limit)
+func (s *BookService) Query(queryParam interface{}, offset, limit int) ([]models.Book, error) {
+	return s.dao.Query(queryParam, offset, limit)
 }

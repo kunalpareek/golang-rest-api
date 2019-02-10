@@ -15,7 +15,7 @@ type (
 	// bookService specifies the interface for the book service needed by bookResource.
 	bookService interface {
 		Get(id bson.ObjectId) (*models.Book, error)
-		Query(offset, limit int) ([]models.Book, error)
+		Query(queryParam interface{}, offset, limit int) ([]models.Book, error)
 		Count() (int, error)
 		Create(model *models.Book) (*models.Book, error)
 		Update(id bson.ObjectId, model *models.Book) (*models.Book, error)
@@ -31,29 +31,31 @@ type (
 // ServeBookResource sets up the routing of book endpoints and the corresponding handlers.
 func ServeBookResource(r *mux.Router, service bookService) *mux.Router {
 	resource := &bookResource{service}
-	// r.Get("/books", resource.get)
 	r.HandleFunc("/books", resource.get).Methods("GET")
 	r.HandleFunc("/books", resource.create).Methods("POST")
-	// r.Get("/books", resource.query)
-	// r.Post("/books", resource.create)
-	// r.Put("/books/<id>", resource.update)
-	// r.Delete("/books/<id>", resource.delete)
+	r.HandleFunc("/books", resource.update).Methods("PUT")
+	r.HandleFunc("/books", resource.delete).Methods("DELETE")
 	return r
 }
 
 func (b *bookResource) get(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
+	author := r.URL.Query().Get("author")
+	if author != "" {
+		data, err := b.service.Query(bson.M{"author": author}, 0, 10)
+		if err != nil {
+			utils.RespondWithError(w, http.StatusBadRequest, "Error in fetching data")
+		}
 
-	data, err := b.service.Get(bson.ObjectIdHex(id))
-	if err != nil {
-		utils.RespondWithError(w, http.StatusBadRequest, "Error in fetching data")
+		utils.RespondWithJSON(w, http.StatusOK, &data)
+	} else {
+		data, err := b.service.Get(bson.ObjectIdHex(id))
+		if err != nil {
+			utils.RespondWithError(w, http.StatusBadRequest, "Error in fetching data")
+		}
+
+		utils.RespondWithJSON(w, http.StatusOK, &data)
 	}
-
-	utils.RespondWithJSON(w, 200, &data)
-}
-
-func (b *bookResource) query(w http.ResponseWriter, r *http.Request) {
-
 }
 
 func (b *bookResource) create(w http.ResponseWriter, r *http.Request) {
@@ -66,13 +68,30 @@ func (b *bookResource) create(w http.ResponseWriter, r *http.Request) {
 		utils.RespondWithError(w, http.StatusBadRequest, "Error in saving data")
 	}
 
-	utils.RespondWithJSON(w, 200, &data)
+	utils.RespondWithJSON(w, http.StatusOK, &data)
 }
 
 func (b *bookResource) update(w http.ResponseWriter, r *http.Request) {
+	var model models.Book
+	id := r.URL.Query().Get("id")
 
+	if err := json.NewDecoder(r.Body).Decode(&model); err != nil {
+		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
+	}
+	data, err := b.service.Update(bson.ObjectIdHex(id), &model)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusBadRequest, "Error in updating data")
+	}
+
+	utils.RespondWithJSON(w, http.StatusOK, &data)
 }
 
-func (b *bookResource) delete() {
+func (b *bookResource) delete(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	data, err := b.service.Delete(bson.ObjectIdHex(id))
+	if err != nil {
+		utils.RespondWithError(w, http.StatusBadRequest, "Error in deleting data")
+	}
 
+	utils.RespondWithJSON(w, http.StatusOK, &data)
 }
