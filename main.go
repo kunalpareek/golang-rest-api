@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/kunalpareek/golang-rest-api/config"
+
 	"github.com/gorilla/mux"
 	"github.com/kunalpareek/golang-rest-api/apis"
 	"github.com/kunalpareek/golang-rest-api/daos"
@@ -13,7 +15,8 @@ import (
 )
 
 func main() {
-	session, err := mgo.Dial("mongodb://localhost:27017/lookup")
+	conf, err := config.LoadConfig()
+	session, err := mgo.Dial(conf.DbConnectionString)
 	if err != nil {
 		panic(err)
 	}
@@ -21,7 +24,7 @@ func main() {
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 
-	if err := http.ListenAndServe(":3000", buildRouter(session)); err != nil {
+	if err := http.ListenAndServe(":"+conf.Port, buildRouter(session)); err != nil {
 		log.Fatal(err)
 	}
 }
