@@ -48,8 +48,15 @@ func (b *bookResource) get(w http.ResponseWriter, r *http.Request) {
 		}
 
 		utils.RespondWithJSON(w, http.StatusOK, &data)
-	} else {
+	} else if id != "" {
 		data, err := b.service.Get(bson.ObjectIdHex(id))
+		if err != nil {
+			utils.RespondWithError(w, http.StatusBadRequest, "Error in fetching data")
+		}
+
+		utils.RespondWithJSON(w, http.StatusOK, &data)
+	} else {
+		data, err := b.service.Query(nil, 0, 10)
 		if err != nil {
 			utils.RespondWithError(w, http.StatusBadRequest, "Error in fetching data")
 		}

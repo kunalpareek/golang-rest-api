@@ -4,10 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kunalpareek/golang-rest-api/config"
-
 	"github.com/gorilla/mux"
 	"github.com/kunalpareek/golang-rest-api/apis"
+	"github.com/kunalpareek/golang-rest-api/config"
 	"github.com/kunalpareek/golang-rest-api/daos"
 	"github.com/kunalpareek/golang-rest-api/middleware"
 	"github.com/kunalpareek/golang-rest-api/services"
